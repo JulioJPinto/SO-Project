@@ -6,15 +6,15 @@
 #include <common.h>
 
 int main(){
-    write(STDOUT_FILENO,"Server starting",sizeof(char) * 16);
+    write(STDOUT_FILENO,"Server starting\n",sizeof(char) * 17);
     if( ( mkfifo(REQUEST_PIPE_PATH,S_IRWXU)) != 0) {
-        write(STDOUT_FILENO,"Error creating FIFO",sizeof(char) * 20);
+        write(STDOUT_FILENO,"Error creating FIFO\n",sizeof(char) * 21);
         return -1;
     }
     int pipe = open(REQUEST_PIPE_PATH,O_RDONLY);
-    char* a = malloc(sizeof(char) * 4);
-    read(pipe,a,sizeof(char) * 4);
-    write(STDOUT_FILENO,a,sizeof(char) * 4);
+    char* a = malloc(sizeof(char) * 5);
+    read(pipe,a,sizeof(char) * 5);
+    write(STDOUT_FILENO,a,sizeof(char) * 5);
     unlink(REQUEST_PIPE_PATH);
     return 0;
 }

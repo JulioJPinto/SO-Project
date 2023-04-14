@@ -1,38 +1,35 @@
 CC := gcc
-
-EXEC := monitor
 FLAGS := -Wall -Wextra -Wdouble-promotion -Werror=pedantic -Werror=vla -pedantic-errors -Wfatal-errors -Wno-unused-function
 INC := -I includes/
-SRC := src/monitor.c src/common.c
-OBJ_DIR := obj
-OBJ := $(SRC:src/%.c=build/%.o)
 
-EXEC_CLIENT := tracer
-FLAGS_CLIENT := $(FLAGS) 
-INC_CLIENT := $(INC)
+EXEC_SERVER := bin/monitor
+SRC_SERVER := src/monitor.c src/common.c
+OBJ_SERVER := $(SRC_SERVER:src/%.c=obj/monitor/%.o)
+
+EXEC_CLIENT := bin/tracer
 SRC_CLIENT := src/tracer.c src/parser.c src/common.c
-OBJ_CLIENT := $(SRC:src/%.c=build/%.o)
+OBJ_CLIENT := $(SRC_CLIENT:src/%.c=obj/tracer/%.o)
 
-BUILD_DIR := $(shell mkdir -p build)
+BUILD_DIR := $(shell mkdir -p bin obj/monitor obj/tracer)
 
 .PHONY: all
-all: $(EXEC) $(EXEC_CLIENT)
+all: $(EXEC_SERVER) $(EXEC_CLIENT)
 
-$(EXEC): $(OBJ)
+$(EXEC_SERVER): $(OBJ_SERVER)
 	@$(CC) $(FLAGS) $^ -o $@ ; echo "[Compiling] $@"
 
-build/%.o: src/%.c
+obj/monitor/%.o: src/%.c
 	@$(CC) $(FLAGS) -c $< $(INC) -o $@ ; echo "[Linking] $@"
 
 $(EXEC_CLIENT): $(OBJ_CLIENT)
 	@$(CC) $(FLAGS_CLIENT) $^ -o $@ ; echo "[Compiling] $@"
 
-build/%.o: src/%.c
-	@$(CC) $(FLAGS_CLIENT) -c $< $(INC_CLIENT) -o $@ ; echo "[Linking] $@"
+obj/tracer/%.o: src/%.c
+	@$(CC) $(FLAGS) -c $< $(INC) -o $@ ; echo "[Compiling] $@"
+
 
 .PHONY: clean
 clean:
-	@unlink pipe ; echo "[Cleaning] Making sure the pipe is closed"
-	@rm -f client ; echo "[Cleaning] client"
-	@rm -f server ; echo "[Cleaning] server"
-	@rm -rf build/ ; echo "[Cleaning] build/"
+	@unlink request_pipe ; echo "[Cleaning] Making sure the pipe is closed"
+	@rm -rf bin/ ; echo "[Cleaning] bin/"
+	@rm -rf obj/ ; echo "[Cleaning] obj/"
