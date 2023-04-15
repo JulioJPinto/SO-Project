@@ -7,7 +7,7 @@ SRC_SERVER := src/monitor.c src/common.c
 OBJ_SERVER := $(SRC_SERVER:src/%.c=obj/monitor/%.o)
 
 EXEC_CLIENT := bin/tracer
-SRC_CLIENT := src/tracer.c src/parser.c src/common.c
+SRC_CLIENT := src/tracer.c src/parser.c src/common.c src/requests.c
 OBJ_CLIENT := $(SRC_CLIENT:src/%.c=obj/tracer/%.o)
 
 BUILD_DIR := $(shell mkdir -p bin obj/monitor obj/tracer)

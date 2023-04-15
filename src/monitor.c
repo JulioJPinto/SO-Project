@@ -3,7 +3,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <common.h>
+
+#include "common.h"
 
 int main(){
     write(STDOUT_FILENO,"Server starting\n",sizeof(char) * 17);
@@ -12,9 +13,11 @@ int main(){
         return -1;
     }
     int pipe = open(REQUEST_PIPE_PATH,O_RDONLY);
-    char* a = malloc(sizeof(char) * 5);
-    read(pipe,a,sizeof(char) * 5);
-    write(STDOUT_FILENO,a,sizeof(char) * 5);
+    Request request;
+    read(pipe,&request,sizeof(Request));
+    write(STDOUT_FILENO,"program started\n",sizeof(char) * 17);
+    read(pipe,&request,sizeof(Request));
+    write(STDOUT_FILENO,"program finished\n",sizeof(char) * 18);
     unlink(REQUEST_PIPE_PATH);
     return 0;
 }
