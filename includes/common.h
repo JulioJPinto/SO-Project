@@ -3,13 +3,18 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#define MAX_PID_LENGTH 5
 #define NAME_MAX 30
 #define REQUEST_PIPE_PATH "request_pipe"
 
-typedef struct request{
-    int type;
-    pid_t PID;
-    char program_name[NAME_MAX];
-    struct timeval time;
-} Request;
+//Definition of errors
+#define WRONG_NUM_ARGUMENTS -1
+#define UNKNOWN_COMMAND -2
+#define UNKNOWN_OPTION -3
+
+//Commands definition
+#define SINGLE_EXECUTE 1
+#define CHAINED_EXECUTE 2
+
+char* pid_running_msg(pid_t PID);
 #endif

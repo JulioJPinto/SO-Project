@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "common.h"
+#include "requests.h"
 
 int main(){
     write(STDOUT_FILENO,"Server starting\n",sizeof(char) * 17);
