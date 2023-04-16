@@ -1,5 +1,5 @@
 CC := gcc
-FLAGS := -Wall -Wextra -Wdouble-promotion -Werror=pedantic -Werror=vla -pedantic-errors -Wfatal-errors -Wno-unused-function
+FLAGS := -O2 -Wall -Wextra -Wdouble-promotion -Werror=pedantic -Werror=vla -pedantic-errors -Wfatal-errors -Wno-unused-result
 INC := -I includes/
 
 EXEC_SERVER := bin/monitor

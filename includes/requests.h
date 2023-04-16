@@ -1,8 +1,10 @@
 #ifndef REQUESTS_H
 #define REQUESTS_H
 
-#define START_EXEC 1
-#define FINISH_EXEC 2
+#define CREATE_CONNECTION 1
+#define CLOSE_CONNECTION 0
+#define START_EXEC 2
+#define FINISH_EXEC 3
 
 #include "common.h"
 
