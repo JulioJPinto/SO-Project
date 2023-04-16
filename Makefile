@@ -33,3 +33,6 @@ clean:
 	@unlink request_pipe ; echo "[Cleaning] Making sure the pipe is closed"
 	@rm -rf bin/ ; echo "[Cleaning] bin/"
 	@rm -rf obj/ ; echo "[Cleaning] obj/"
+
+format:
+	clang-format -i src/*.c includes/*.h
