@@ -1,9 +1,15 @@
 CC := gcc
-FLAGS := -O2 -Wall -Wextra -Wdouble-promotion -Werror=pedantic -Werror=vla -pedantic-errors -Wfatal-errors -Wno-unused-result
+FLAGS := -Wall -Wextra -Wdouble-promotion -Werror=pedantic -Werror=vla -pedantic-errors -Wfatal-errors -Wno-unused-result
 INC := -I includes/
 
+ifeq ($(DEBUG), 1)
+	FLAGS += -O0 -g
+else
+	FLAGS += -O3
+endif
+
 EXEC_SERVER := bin/monitor
-SRC_SERVER := src/monitor.c src/common.c src/requests.c
+SRC_SERVER := src/monitor.c src/common.c src/requests.c src/interface.c src/errors.c
 OBJ_SERVER := $(SRC_SERVER:src/%.c=obj/monitor/%.o)
 
 EXEC_CLIENT := bin/tracer
@@ -30,9 +36,12 @@ obj/tracer/%.o: src/%.c
 
 .PHONY: clean
 clean:
-	@unlink request_pipe ; echo "[Cleaning] Making sure the pipe is closed"
+	@find . -type p -delete ; echo "[Cleaning] Making sure the pipes are closed"
 	@rm -rf bin/ ; echo "[Cleaning] bin/"
 	@rm -rf obj/ ; echo "[Cleaning] obj/"
+
+cleanpipe:
+	@find . -type p -delete ; echo "[Cleaning] Making sure the pipes are closed"
 
 format:
 	clang-format -i src/*.c includes/*.h

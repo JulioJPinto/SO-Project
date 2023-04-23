@@ -7,14 +7,9 @@
 #define NAME_MAX 30
 #define REQUEST_PIPE_PATH "request_pipe"
 
-// Definition of errors
-#define WRONG_NUM_ARGUMENTS -1
-#define UNKNOWN_COMMAND -2
-#define UNKNOWN_OPTION -3
-
-// Commands definition
-#define SINGLE_EXECUTE 1
-#define CHAINED_EXECUTE 2
-
 char *pid_running_msg(pid_t PID);
+
+char *time_taken_msg(struct timeval time);
+
+char *output_pipe_by_pid(pid_t pid);
 #endif

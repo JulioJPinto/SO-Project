@@ -1,22 +1,21 @@
 #ifndef REQUESTS_H
 #define REQUESTS_H
 
-#define CREATE_CONNECTION 1
-#define CLOSE_CONNECTION 0
-#define START_EXEC 2
-#define FINISH_EXEC 3
+typedef enum { FINISHED_EXEC, SINGLE_EXEC, CHAINED_EXEC } request_type;
 
 #include "common.h"
 
 typedef struct request {
-  int type;
-  pid_t PID;
+  request_type type;
+  pid_t requesting_pid;
+  pid_t child_pid;
   char program_name[NAME_MAX];
   struct timeval time;
 } Request;
 
-Request new_execute_request(pid_t PID, char *program_name);
+Request new_execute_request(pid_t requesting_PID, pid_t child_PID,
+                            char *program_name);
 
-Request finished_execution_request(pid_t PID);
+Request finished_execution_request(pid_t requesting_PID, pid_t child_PID);
 
 #endif

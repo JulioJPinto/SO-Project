@@ -1,6 +1,7 @@
 #include <string.h>
 
-#include "common.h"
+#include "errors.h"
+#include "requests.h"
 
 int verify_arg_number(int argc) {
   if (argc != 4) {
@@ -13,14 +14,14 @@ int identify_command(char *command) {
   if (strcmp(command, "execute") != 0) {
     return UNKNOWN_COMMAND;
   }
-  return SINGLE_EXECUTE;
+  return SINGLE_EXEC;
 }
 
 int identify_option(char *option) {
   if (strcmp(option, "-u") != 0) {
     return UNKNOWN_OPTION;
   }
-  return SINGLE_EXECUTE;
+  return SINGLE_EXEC;
 }
 
 int verify_input(int argc, char **argv) {
