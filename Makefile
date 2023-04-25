@@ -44,4 +44,4 @@ cleanpipe:
 	@find . -type p -delete ; echo "[Cleaning] Making sure the pipes are closed"
 
 format:
-	clang-format -i src/*.c includes/*.h
+	clang-format --style="{IndentWidth: 4, TabWidth: 4}" -i src/*.c includes/*.h
