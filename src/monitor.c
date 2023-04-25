@@ -43,5 +43,6 @@ int main() {
     }
     unlink(REQUEST_PIPE_PATH);
     write(STDOUT_FILENO, "Server shutting down\n", sizeof(char) * 22);
+
     return 0;
 }

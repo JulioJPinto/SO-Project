@@ -12,4 +12,5 @@ char *pid_running_msg(pid_t PID);
 char *time_taken_msg(struct timeval time);
 
 char *output_pipe_by_pid(pid_t pid);
+
 #endif

@@ -33,4 +33,5 @@ char *output_pipe_by_pid(pid_t pid) {
     strcpy(output_pipe_string, "output_");
     strcat(output_pipe_string, PID_string);
     return output_pipe_string;
+
 }
