@@ -40,7 +40,6 @@ int single_execute(char *command, char *output_pipe_string) {
     pid_t requesting_pid = getpid();
     Request new_request =
         new_execute_request(requesting_pid, child_pid, parsed_command[0]);
-    write(STDOUT_FILENO, "writing\n", sizeof(char) * 9);
     write(request_pipe, &new_request, sizeof(Request));
 
     // Waiting for permission from the server for the program to run
@@ -56,8 +55,7 @@ int single_execute(char *command, char *output_pipe_string) {
 
     // The server is informed when the program has finished running
     int status;
-    pid_t finished;
-    finished = wait(&status);
+    wait(&status);
     Request finish_request =
         finished_execution_request(requesting_pid, child_pid);
     write(request_pipe, &finish_request, sizeof(Request));

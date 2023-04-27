@@ -1,7 +1,7 @@
 #ifndef REQUESTS_H
 #define REQUESTS_H
 
-typedef enum { FINISHED_EXEC, SINGLE_EXEC, CHAINED_EXEC } request_type;
+typedef enum { UNKNOWN, FINISHED_EXEC, SINGLE_EXEC, CHAINED_EXEC } request_type;
 
 #include "common.h"
 

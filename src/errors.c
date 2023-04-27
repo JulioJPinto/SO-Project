@@ -2,7 +2,7 @@
 
 #include "errors.h"
 
-int print_error(int error) {
+int print_error(error error) {
     int print_status;
     switch (error) {
     case WRONG_NUM_ARGUMENTS:
@@ -22,6 +22,12 @@ int print_error(int error) {
     case FIFO_CREATING_ERROR:
         print_status =
             write(STDOUT_FILENO, "Error creating FIFO\n", sizeof(char) * 21);
+        return print_status;
+    case REQUEST_NOT_FOUND:
+        print_status = write(
+            STDOUT_FILENO,
+            "Couldn't find the original request upon the program finishing\n",
+            sizeof(char) * 63);
         return print_status;
     default:
         return -1;

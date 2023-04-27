@@ -11,11 +11,13 @@
 
 int main(int argc, char **argv) {
     int sucess = 1;
-    int input_check = verify_input(argc, argv);
-    if (input_check < 0) {
+    error input_check = verify_input(argc, argv);
+    if (input_check != NONE) {
         print_error(input_check);
         return 0;
     }
+    request_type request_type = identify_command(argv);
+
     pid_t pid = getpid();
     char *output_pipe_string = output_pipe_by_pid(pid);
 
@@ -24,7 +26,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    if (input_check == SINGLE_EXEC) {
+    if (request_type == SINGLE_EXEC) {
         sucess = single_execute(argv[3], output_pipe_string);
     }
     unlink(output_pipe_string);

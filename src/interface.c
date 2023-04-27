@@ -6,11 +6,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "array.h"
 #include "common.h"
 #include "errors.h"
 #include "requests.h"
 
-int handle_request(Request request, Request *running_programs) {
+int handle_request(Request request, Running_Programs *running_programs) {
     switch (request.type) {
     case SINGLE_EXEC: {
         // The pipe is open
@@ -18,7 +19,7 @@ int handle_request(Request request, Request *running_programs) {
         int output_pipe = open(output_pipe_string, O_WRONLY);
 
         // The permission for the program to run is sent
-        running_programs[request.child_pid] = request;
+        add_running_program(running_programs, request);
         int run_permission = 1;
         write(output_pipe, &run_permission, sizeof(int));
 
@@ -33,8 +34,13 @@ int handle_request(Request request, Request *running_programs) {
 
         // The time taken to execute the program is calculated
         struct timeval running_time;
-        request = running_programs[request.child_pid];
-        struct timeval init_time = request.time;
+        int request_position =
+            find_running_program(running_programs, request.child_pid);
+        if (request_position == -1) {
+            print_error(REQUEST_NOT_FOUND);
+        }
+        Request init_request = running_programs->array[request_position];
+        struct timeval init_time = init_request.time;
         struct timeval current_time;
         gettimeofday(&current_time, NULL);
         running_time.tv_sec = current_time.tv_sec - init_time.tv_sec;

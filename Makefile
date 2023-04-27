@@ -10,7 +10,7 @@ else
 endif
 
 EXEC_SERVER := bin/monitor
-SRC_SERVER := src/monitor.c src/common.c src/requests.c src/interface.c src/errors.c
+SRC_SERVER := src/monitor.c src/common.c src/requests.c src/interface.c src/errors.c src/array.c
 OBJ_SERVER := $(SRC_SERVER:src/%.c=obj/monitor/%.o)
 
 EXEC_CLIENT := bin/tracer

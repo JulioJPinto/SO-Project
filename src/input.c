@@ -3,36 +3,49 @@
 #include "errors.h"
 #include "requests.h"
 
-int verify_arg_number(int argc) {
+error verify_arg_number(int argc) {
     if (argc != 4) {
         return WRONG_NUM_ARGUMENTS;
     }
-    return 0;
+    return NONE;
 }
 
-int identify_command(char *command) {
+request_type identify_command_arg(char *command) {
     if (strcmp(command, "execute") != 0) {
-        return UNKNOWN_COMMAND;
+        return UNKNOWN;
     }
     return SINGLE_EXEC;
 }
 
-int identify_option(char *option) {
+request_type identify_option(char *option) {
     if (strcmp(option, "-u") != 0) {
-        return UNKNOWN_OPTION;
+        return UNKNOWN;
     }
     return SINGLE_EXEC;
 }
 
-int verify_input(int argc, char **argv) {
-    int argument_check, command_check;
+error verify_input(int argc, char **argv) {
+    error argument_check;
     argument_check = verify_arg_number(argc);
-    if (argument_check != 0) {
+    if (argument_check != NONE) {
         return argument_check;
     }
-    command_check = identify_command(argv[1]);
-    if (command_check != 0) {
-        return command_check;
+    request_type command_check;
+    command_check = identify_command_arg(argv[1]);
+    if (command_check == UNKNOWN) {
+        return UNKNOWN_COMMAND;
     }
-    return identify_option(argv[2]);
+    if (identify_option(argv[2]) == UNKNOWN) {
+        return UNKNOWN_OPTION;
+    }
+    return NONE;
+}
+
+request_type identify_command(char **argv) {
+    request_type command;
+    command = identify_command_arg(argv[1]);
+    if (command == SINGLE_EXEC) {
+        return identify_option(argv[2]);
+    }
+    return UNKNOWN;
 }
