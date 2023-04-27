@@ -12,9 +12,14 @@ char *pid_running_msg(pid_t PID) {
     return running_msg;
 }
 
-char *time_taken_msg(struct timeval time) {
+long time_struct_to_long(struct timeval time) {
     long ms = time.tv_sec * 1000;
     ms += (time.tv_usec / 1000);
+    return ms;
+}
+
+char *time_taken_msg(struct timeval time) {
+    long ms = time_struct_to_long(time);
     char ms_string[100];
     int digits_written = sprintf(ms_string, "%ld ", ms);
 
@@ -33,4 +38,13 @@ char *output_pipe_by_pid(pid_t pid) {
     strcpy(output_pipe_string, "output_");
     strcat(output_pipe_string, PID_string);
     return output_pipe_string;
+}
+
+// Calculates the time difference between two timestamps
+struct timeval calculate_time_taken(struct timeval init_time,
+                                    struct timeval finish_time) {
+    struct timeval time_taken;
+    time_taken.tv_sec = finish_time.tv_sec - init_time.tv_sec;
+    time_taken.tv_usec = finish_time.tv_usec - init_time.tv_usec;
+    return time_taken;
 }

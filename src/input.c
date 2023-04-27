@@ -4,17 +4,20 @@
 #include "requests.h"
 
 error verify_arg_number(int argc) {
-    if (argc != 4) {
-        return WRONG_NUM_ARGUMENTS;
+    if (argc == 4 || argc == 2) {
+        return NONE;
     }
-    return NONE;
+    return WRONG_NUM_ARGUMENTS;
 }
 
 request_type identify_command_arg(char *command) {
-    if (strcmp(command, "execute") != 0) {
-        return UNKNOWN;
+    if (strcmp(command, "execute") == 0) {
+        return SINGLE_EXEC;
     }
-    return SINGLE_EXEC;
+    if (strcmp(command, "status") == 0) {
+        return STATUS;
+    }
+    return UNKNOWN;
 }
 
 request_type identify_option(char *option) {
@@ -35,7 +38,7 @@ error verify_input(int argc, char **argv) {
     if (command_check == UNKNOWN) {
         return UNKNOWN_COMMAND;
     }
-    if (identify_option(argv[2]) == UNKNOWN) {
+    if (argc >= 3 && (identify_option(argv[2]) == UNKNOWN)) {
         return UNKNOWN_OPTION;
     }
     return NONE;
@@ -47,5 +50,5 @@ request_type identify_command(char **argv) {
     if (command == SINGLE_EXEC) {
         return identify_option(argv[2]);
     }
-    return UNKNOWN;
+    return command;
 }

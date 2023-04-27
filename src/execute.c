@@ -11,6 +11,7 @@
 #include "parser.h"
 #include "requests.h"
 
+// Handles instances of excution of a single program
 int single_execute(char *command, char *output_pipe_string) {
 
     // The command to be executed is parsed
@@ -20,12 +21,16 @@ int single_execute(char *command, char *output_pipe_string) {
        as argument (child process) permission to run*/
     int internal_pipe[2];
     pipe(internal_pipe);
+
+    // Forking the child process that will execute the program
     pid_t child_pid = fork();
     if (child_pid == 0) {
         close(internal_pipe[1]);
+        // Waiting for permission to start running
         int run_permission;
         read(internal_pipe[0], &run_permission, sizeof(int));
         if (run_permission) {
+            // Running the program
             execvp(parsed_command[0], parsed_command);
         } else {
             _exit(1);
@@ -33,7 +38,7 @@ int single_execute(char *command, char *output_pipe_string) {
     }
     close(internal_pipe[0]);
 
-    // Opens the input and output pipes
+    // Opens the input pipe
     int request_pipe = open(REQUEST_PIPE_PATH, O_WRONLY);
 
     // Sends to the server the information that the program is running
@@ -72,8 +77,35 @@ int single_execute(char *command, char *output_pipe_string) {
     write(STDOUT_FILENO, time_msg, sizeof(char) * strlen(time_msg));
     free(time_msg);
 
+    // Closing resources
     close(request_pipe);
     close(output_pipe);
     free(parsed_command);
+    return 0;
+}
+
+int execute_status(char *output_pipe_string) {
+    // Opens the input pipe
+    int input_pipe = open(REQUEST_PIPE_PATH, O_WRONLY);
+
+    // Creates and sends the request to the server
+    pid_t pid = getpid();
+    Request status_request = new_status_request(pid);
+    write(input_pipe, &status_request, sizeof(Request));
+
+    int output_pipe = open(output_pipe_string, O_RDONLY);
+    char message[100];
+    int bytes_read = 0;
+    while (!bytes_read) {
+        bytes_read = read(output_pipe, message, sizeof(char) * 100);
+    }
+    while (strcmp(message, "")) {
+        if (bytes_read != 0) {
+            write(STDOUT_FILENO, message, sizeof(char) * strlen(message));
+        }
+        bytes_read = read(output_pipe, message, sizeof(char) * 100);
+    }
+    close(input_pipe);
+    close(output_pipe);
     return 0;
 }
