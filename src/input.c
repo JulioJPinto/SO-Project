@@ -21,10 +21,13 @@ request_type identify_command_arg(char *command) {
 }
 
 request_type identify_option(char *option) {
-    if (strcmp(option, "-u") != 0) {
-        return UNKNOWN;
+    if (strcmp(option, "-u") == 0) {
+        return SINGLE_EXEC;
     }
-    return SINGLE_EXEC;
+    if (strcmp(option, "-p") == 0) {
+        return PIPELINE_EXEC;
+    }
+    return UNKNOWN;
 }
 
 error verify_input(int argc, char **argv) {
