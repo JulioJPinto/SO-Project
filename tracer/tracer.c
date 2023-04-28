@@ -10,38 +10,41 @@
 #include "requests.h"
 
 int main(int argc, char **argv) {
-    int sucess;
+    int result;
+    
     error input_check = verify_input(argc, argv);
     if (input_check != NONE) {
         print_error(input_check);
-        return 0;
+        return EXIT_FAILURE;
     }
+
     request_type request_type = identify_command(argv);
 
     pid_t pid = getpid();
-    char *output_pipe_string = output_pipe_by_pid(pid);
+    char *output_pipe_string = get_pipe_name(pid);
 
     if (mkfifo(output_pipe_string, S_IRWXU) != 0) {
         print_error(FIFO_CREATING_ERROR);
-        return 1;
+        perror("mkfifo");
+        return EXIT_FAILURE;
     }
 
     switch (request_type) {
         case SINGLE_EXEC:
-            sucess = single_execute(argv[3], output_pipe_string);
+            result = single_execute(argv[3], output_pipe_string);
             break;
         case PIPELINE_EXEC:
-            sucess = pipeline_execute(argv[3], output_pipe_string);
+            result = pipeline_execute(argv[3], output_pipe_string);
             break;
-        case STATUS: {
-            sucess = execute_status(output_pipe_string);
-        } break;
+        case STATUS:
+            result = execute_status(output_pipe_string);
+            break;
         default:
-            sucess = 1;
+            result = EXIT_FAILURE;
             break;
     }
 
     unlink(output_pipe_string);
     free(output_pipe_string);
-    return sucess;
+    return result;
 }

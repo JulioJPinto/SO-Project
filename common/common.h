@@ -15,7 +15,7 @@ long time_struct_to_long(struct timeval time);
 
 char *time_taken_msg(struct timeval time);
 
-char *output_pipe_by_pid(pid_t pid);
+char *get_pipe_name(pid_t pid);
 
 // Calculates the time difference between two timestamps
 struct timeval calculate_time_taken(struct timeval init_time,

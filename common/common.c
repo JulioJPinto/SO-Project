@@ -1,9 +1,9 @@
+#include "common.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-
-#include "common.h"
 
 // Not sure this is the best place for this function, maybe a messages.c?
 char *pid_running_msg(pid_t PID) {
@@ -30,14 +30,12 @@ char *time_taken_msg(struct timeval time) {
     return time_msg;
 }
 
-char *output_pipe_by_pid(pid_t pid) {
-    char PID_string[MAX_PID_LENGTH + 1];
-    int bytes_written = sprintf(PID_string, "%d", pid);
+#define PIPE_PREFIX "output_"
 
-    char *output_pipe_string = malloc(sizeof(char) * (bytes_written + 8));
-    strcpy(output_pipe_string, "output_");
-    strcat(output_pipe_string, PID_string);
-    return output_pipe_string;
+char *get_pipe_name(pid_t pid) {
+    char *pipe_name = malloc(sizeof(char) * (strlen(PIPE_PREFIX) + MAX_PID_LENGTH));
+    sprintf(pipe_name, "%s%d", PIPE_PREFIX, pid);
+    return pipe_name;
 }
 
 // Calculates the time difference between two timestamps

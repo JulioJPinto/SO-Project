@@ -16,7 +16,7 @@ int handle_request(Request request, Running_Programs *running_programs) {
     case SINGLE_EXEC:
     case PIPELINE_EXEC: {
         // The pipe is open
-        char *output_pipe_string = output_pipe_by_pid(request.requesting_pid);
+        char *output_pipe_string = get_pipe_name(request.requesting_pid);
         int output_pipe = open(output_pipe_string, O_WRONLY);
 
         // The permission for the program to run is sent
@@ -31,7 +31,7 @@ int handle_request(Request request, Running_Programs *running_programs) {
 
     case FINISHED_EXEC: {
         // The pipe is open
-        char *output_pipe_string = output_pipe_by_pid(request.requesting_pid);
+        char *output_pipe_string = get_pipe_name(request.requesting_pid);
         int output_pipe = open(output_pipe_string, O_WRONLY);
 
         // The time taken to execute the program is calculated
@@ -55,7 +55,7 @@ int handle_request(Request request, Running_Programs *running_programs) {
     } break;
     case STATUS: {
         // The output pipe is open
-        char *output_pipe_string = output_pipe_by_pid(request.requesting_pid);
+        char *output_pipe_string = get_pipe_name(request.requesting_pid);
         int output_pipe = open(output_pipe_string, O_WRONLY);
         // The running message for each program is created
         Request program;
