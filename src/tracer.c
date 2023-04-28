@@ -30,6 +30,9 @@ int main(int argc, char **argv) {
     case SINGLE_EXEC:
         sucess = single_execute(argv[3], output_pipe_string);
         break;
+    case PIPELINE_EXEC:
+        sucess = pipeline_execute(argv[3], output_pipe_string);
+        break;
     case STATUS: {
         sucess = execute_status(output_pipe_string);
     } break;

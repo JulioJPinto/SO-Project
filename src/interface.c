@@ -13,7 +13,8 @@
 
 int handle_request(Request request, Running_Programs *running_programs) {
     switch (request.type) {
-    case SINGLE_EXEC: {
+    case SINGLE_EXEC:
+    case PIPELINE_EXEC: {
         // The pipe is open
         char *output_pipe_string = output_pipe_by_pid(request.requesting_pid);
         int output_pipe = open(output_pipe_string, O_WRONLY);
@@ -27,6 +28,7 @@ int handle_request(Request request, Running_Programs *running_programs) {
         close(output_pipe);
         free(output_pipe_string);
     } break;
+
     case FINISHED_EXEC: {
         // The pipe is open
         char *output_pipe_string = output_pipe_by_pid(request.requesting_pid);
@@ -84,7 +86,6 @@ int handle_request(Request request, Running_Programs *running_programs) {
             current_program_number--;
         }
         // An empty string is sent to signal all the programs were sent
-
         write(output_pipe, "", sizeof(char));
         close(output_pipe);
     } break;

@@ -3,6 +3,8 @@
 
 int single_execute(char *command, char *output_pipe_string);
 
+int pipeline_execute(char *commands, char *output_pipe_string);
+
 int execute_status(char *output_pipe_string);
 
 #endif
