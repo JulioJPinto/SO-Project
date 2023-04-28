@@ -1,7 +1,7 @@
 CC := gcc
 
 FLAGS := -Wall -Wextra -Wdouble-promotion -Werror=pedantic -Werror=vla -pedantic-errors -Wfatal-errors -Wno-unused-result
-INC := -I includes/
+LDFLAGS =
 
 ifeq ($(DEBUG), 1)
 	FLAGS += -O0 -g
@@ -9,35 +9,60 @@ else
 	FLAGS += -O3
 endif
 
-EXEC_SERVER := bin/monitor
-SRC_SERVER := src/monitor.c src/common.c src/requests.c src/interface.c src/errors.c src/array.c
-OBJ_SERVER := $(SRC_SERVER:src/%.c=obj/monitor/%.o)
+COMMON_DIR = common
+MONITOR_DIR = monitor
+TRACER_DIR = tracer
 
-EXEC_CLIENT := bin/tracer
-SRC_CLIENT := src/tracer.c src/common.c src/requests.c src/input.c src/errors.c src/parser.c src/execute.c
-OBJ_CLIENT := $(SRC_CLIENT:src/%.c=obj/tracer/%.o)
+COMMON_SRCS := $(wildcard $(COMMON_DIR)/*.c)
+MONITOR_SRCS := $(wildcard $(MONITOR_DIR)/*.c)
+TRACER_SRCS := $(wildcard $(TRACER_DIR)/*.c)
 
-BUILD_DIR := $(shell mkdir -p bin obj/monitor obj/tracer)
+OBJ_DIR = obj
+COMMON_OBJ_DIR = $(OBJ_DIR)/common
+MONITOR_OBJ_DIR = $(OBJ_DIR)/monitor
+TRACER_OBJ_DIR = $(OBJ_DIR)/tracer
 
-.PHONY: all
-all: $(EXEC_SERVER) $(EXEC_CLIENT)
+COMMON_OBJS := $(patsubst $(COMMON_DIR)/%.c,$(COMMON_OBJ_DIR)/%.o,$(COMMON_SRCS))
+MONITOR_OBJS := $(patsubst $(MONITOR_DIR)/%.c,$(MONITOR_OBJ_DIR)/%.o,$(MONITOR_SRCS))
+TRACER_OBJS := $(patsubst $(TRACER_DIR)/%.c,$(TRACER_OBJ_DIR)/%.o,$(TRACER_SRCS))
 
-$(EXEC_SERVER): $(OBJ_SERVER)
-	@$(CC) $(FLAGS) $^ -o $@ ; echo "[Compiling] $@"
+COMMON_INCLUDES := -I$(COMMON_DIR)
+MONITOR_INCLUDES := $(COMMON_INCLUDES) -I$(MONITOR_DIR)
+TRACER_INCLUDES := $(COMMON_INCLUDES) -I$(TRACER_DIR)
 
-obj/monitor/%.o: src/%.c
-	@$(CC) $(FLAGS) -c $< $(INC) -o $@ ; echo "[Linking] $@"
+BIN_DIR = bin
 
-$(EXEC_CLIENT): $(OBJ_CLIENT)
-	@$(CC) $(FLAGS_CLIENT) $^ -o $@ ; echo "[Compiling] $@"
+all: monitor tracer
 
-obj/tracer/%.o: src/%.c
-	@$(CC) $(FLAGS) -c $< $(INC) -o $@ ; echo "[Compiling] $@"
+monitor: $(MONITOR_OBJS) $(COMMON_OBJS) | $(BIN_DIR)
+	$(CC) $(LDFLAGS) $^ -o bin/$@
 
+tracer: $(TRACER_OBJS) $(COMMON_OBJS) | $(BIN_DIR)
+	$(CC) $(LDFLAGS) $^ -o bin/$@
+
+$(COMMON_OBJ_DIR)/%.o: $(COMMON_DIR)/%.c | $(COMMON_OBJ_DIR)
+	$(CC) $(CFLAGS) $(COMMON_INCLUDES) -c $< -o $@
+
+$(MONITOR_OBJ_DIR)/%.o: $(MONITOR_DIR)/%.c | $(MONITOR_OBJ_DIR)
+	$(CC) $(CFLAGS) $(MONITOR_INCLUDES) -c $< -o $@
+
+$(TRACER_OBJ_DIR)/%.o: $(TRACER_DIR)/%.c | $(TRACER_OBJ_DIR)
+	$(CC) $(CFLAGS) $(TRACER_INCLUDES) -c $< -o $@
+
+$(COMMON_OBJ_DIR):
+	mkdir -p $(COMMON_OBJ_DIR)
+
+$(MONITOR_OBJ_DIR):
+	mkdir -p $(MONITOR_OBJ_DIR)
+
+$(TRACER_OBJ_DIR):
+	mkdir -p $(TRACER_OBJ_DIR)
+
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
 
 .PHONY: clean
-clean:
-	@find . -type p -delete ; echo "[Cleaning] Making sure the pipes are closed"
+clean: cleanpipe
 	@rm -rf bin/ ; echo "[Cleaning] bin/"
 	@rm -rf obj/ ; echo "[Cleaning] obj/"
 
