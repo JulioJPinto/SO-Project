@@ -1,5 +1,4 @@
 #include <string.h>
-#include <sys/types.h>
 
 #include "common.h"
 #include "requests.h"

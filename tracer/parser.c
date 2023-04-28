@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <stdio.h>
-
 char **parse_command(char *command_string) {
     char **parsed_command = malloc(sizeof(char *) * 11);
     for (int i = 0; i < 11; i++) {

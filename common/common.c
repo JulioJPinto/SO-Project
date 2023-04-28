@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 
 // Not sure this is the best place for this function, maybe a messages.c?
 char *pid_running_msg(pid_t PID) {

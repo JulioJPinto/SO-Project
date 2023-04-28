@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <sys/types.h>
 
 #include "array.h"
 #include "requests.h"
