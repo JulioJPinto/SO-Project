@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "array.h"
 #include "common.h"
 #include "errors.h"
 #include "interface.h"
@@ -28,7 +29,7 @@ int main() {
     // The request pipe is open
     int request_pipe = open(REQUEST_PIPE_PATH, O_RDONLY);
     Request request;
-    Request running_programs[100000];
+    Running_Programs running_programs = new_list();
 
     signal(SIGINT, monitor_handler);
 
@@ -37,12 +38,12 @@ int main() {
         int read_bytes = read(request_pipe, &request, sizeof(Request));
         if (read_bytes) {
             // The requests as then handled
-            write(STDOUT_FILENO, "handling\n", sizeof(char) * 10);
-            handle_request(request, running_programs);
+            write(STDOUT_FILENO, "Handling Request\n", sizeof(char) * 18);
+            handle_request(request, &running_programs);
         }
     }
     unlink(REQUEST_PIPE_PATH);
     write(STDOUT_FILENO, "Server shutting down\n", sizeof(char) * 22);
-
+    free(running_programs.array);
     return 0;
 }
