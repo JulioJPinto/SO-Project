@@ -8,7 +8,8 @@ typedef enum {
     UNKNOWN_COMMAND,
     UNKNOWN_OPTION,
     FIFO_CREATING_ERROR,
-    REQUEST_NOT_FOUND
+    REQUEST_NOT_FOUND,
+    PROGRAM_EXEC_ERROR
 } error;
 
 int print_error(error error);
