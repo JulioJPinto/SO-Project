@@ -142,36 +142,39 @@ int pipeline_execute(char *commands, char *output_pipe_string) {
             }
             execvp(parsed_commands[i][0], parsed_commands[i]);
         }
-        if (i == 0) {
-            close(internal_pipe[0]);
-            pid = child_pid;
+        if (child_pid) {
+            if (i == 0) {
+                close(internal_pipe[0]);
+                pid = child_pid;
 
-            // Writing "Running PID" message
-            char *running_msg = pid_running_msg(child_pid);
-            write(STDOUT_FILENO, running_msg,
-                  sizeof(char) * (14 + MAX_PID_LENGTH));
-            free(running_msg);
+                // Writing "Running PID" message
+                char *running_msg = pid_running_msg(child_pid);
+                write(STDOUT_FILENO, running_msg,
+                      sizeof(char) * (14 + MAX_PID_LENGTH));
+                free(running_msg);
 
-            Request request =
-                new_pipeline_request(getpid(), child_pid, program_name);
-            write(input_pipe, &request, sizeof(Request));
+                Request request =
+                    new_pipeline_request(getpid(), child_pid, program_name);
+                write(input_pipe, &request, sizeof(Request));
 
-            int run_permission = 0, bytes_read = 0;
-            int output_pipe = open(output_pipe_string, O_RDONLY);
-            while (!bytes_read) {
-                bytes_read = read(output_pipe, &run_permission, sizeof(int));
+                int run_permission = 0, bytes_read = 0;
+                int output_pipe = open(output_pipe_string, O_RDONLY);
+                while (!bytes_read) {
+                    bytes_read =
+                        read(output_pipe, &run_permission, sizeof(int));
+                }
+                close(output_pipe);
+                write(internal_pipe[1], &run_permission, sizeof(int));
             }
-            close(output_pipe);
-            write(internal_pipe[1], &run_permission, sizeof(int));
+            if (i != 0) {
+                close(pipes[i - 1][0]);
+                close(pipes[i - 1][1]);
+            }
         }
     }
     int status;
     for (int i = 0; i < n; i++) {
         wait(&status);
-    }
-    for (int i = 0; i < n - 1; i++) {
-        close(pipes[i][0]);
-        close(pipes[i][1]);
     }
     // The server is informed the program has stopped
     Request request = finished_execution_request(getpid(), pid);
