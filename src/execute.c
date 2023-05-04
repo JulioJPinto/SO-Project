@@ -95,12 +95,16 @@ int pipeline_execute(char *commands, char *output_pipe_string) {
     // The program names are added
     char program_name[NAME_MAX];
     int n;
-    for (n = 0; n < 10 && parsed_commands[n] != NULL; n++) {
+    strncpy(program_name, parsed_commands[n][0],
+            NAME_MAX - 1 - strlen(program_name));
+    for (n = 1; n < 10 && parsed_commands[n] != NULL; n++) {
+        strncat(program_name, " | ", NAME_MAX - 1 - strlen(program_name));
         strncat(program_name, parsed_commands[n][0],
                 NAME_MAX - 1 - strlen(program_name));
     }
     program_name[NAME_MAX - 1] = '\0';
 
+    // Creating pipes to transfer information from each program to the next
     int **pipes = malloc(sizeof(int *) * (n - 1));
     for (int i = 0; i < n - 1; i++) {
         pipes[i] = malloc(sizeof(int) * 2);
@@ -189,7 +193,7 @@ int pipeline_execute(char *commands, char *output_pipe_string) {
     }
 
     // The exit statuses of all programs are then gathered
-    int status[n];
+    int *status = malloc(sizeof(int) * n);
     for (int i = 0; i < n; i++) {
         wait(&(status[i]));
     }
@@ -200,6 +204,7 @@ int pipeline_execute(char *commands, char *output_pipe_string) {
             print_error(PROGRAM_EXEC_ERROR);
         }
     }
+    free(status);
 
     // The server is informed the program has stopped
     Request request = finished_execution_request(getpid(), pid);
