@@ -11,7 +11,27 @@
 #include "errors.h"
 #include "requests.h"
 
-int handle_request(Request request, Running_Programs *running_programs) {
+void save_request_to_file(Request request, char *pids_folder_path) {
+    // The path to the new file is created and the file is opened
+    char *file_path =
+        malloc(sizeof(char) * (strlen(pids_folder_path) + MAX_PID_LENGTH));
+    sprintf(file_path, "%s%d", pids_folder_path, request.child_pid);
+    int file = open(file_path, O_CREAT | O_WRONLY, 0666);
+
+    // The program's name is written to the file
+    write(file, request.program_name,
+          sizeof(char) * strlen(request.program_name));
+    write(file, "\n", sizeof(char));
+
+    // The time taken(ms) is written to the file
+    long time_taken = time_struct_to_long(request.time);
+    char time_string[100];
+    int chars_written = sprintf(time_string, "%ld\n", time_taken);
+    write(file, time_string, sizeof(char) * (chars_written + 1));
+}
+
+int handle_request(Request request, Running_Programs *running_programs,
+                   char *pids_folder_path) {
     switch (request.type) {
     case SINGLE_EXEC:
     case PIPELINE_EXEC: {
@@ -48,6 +68,10 @@ int handle_request(Request request, Running_Programs *running_programs) {
             calculate_time_taken(init_time, current_time);
         write(output_pipe, &running_time, sizeof(struct timeval));
         delete_running_program(running_programs, request_position);
+
+        // The program's log is saved to a file
+        init_request.time = running_time;
+        save_request_to_file(init_request, pids_folder_path);
 
         // The pipe is closed
         close(output_pipe);

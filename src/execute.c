@@ -95,7 +95,7 @@ int pipeline_execute(char *commands, char *output_pipe_string) {
     // The program names are added
     char program_name[NAME_MAX];
     int n;
-    strncpy(program_name, parsed_commands[n][0],
+    strncpy(program_name, parsed_commands[0][0],
             NAME_MAX - 1 - strlen(program_name));
     for (n = 1; n < 10 && parsed_commands[n] != NULL; n++) {
         strncat(program_name, " | ", NAME_MAX - 1 - strlen(program_name));

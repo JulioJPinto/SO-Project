@@ -34,6 +34,11 @@ int print_error(error error) {
             write(STDERR_FILENO, "Requested program exited with errors\n",
                   sizeof(char) * 38);
         return print_status;
+    case NO_FOLDER_GIVEN:
+        print_status = write(STDERR_FILENO,
+                             "Program usage: ./monitor <Process folder path>\n",
+                             sizeof(char) * 48);
+        return print_status;
     default:
         return -1;
     }

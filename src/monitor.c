@@ -1,6 +1,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -18,7 +19,15 @@ void monitor_handler(int x) {
     running = 0;
 }
 
-int main() {
+int main(int argc, char **argv) {
+    if (argc != 2) {
+        print_error(NO_FOLDER_GIVEN);
+        return 0;
+    }
+    char *pids_folder_path = malloc(sizeof(char) * (2 + strlen(argv[1])));
+    strcpy(pids_folder_path, argv[1]);
+    strcat(pids_folder_path, "/");
+
     // The request pipe is made
     write(STDOUT_FILENO, "Server starting\n", sizeof(char) * 17);
     if ((mkfifo(REQUEST_PIPE_PATH, S_IRWXU)) != 0) {
@@ -33,17 +42,18 @@ int main() {
 
     signal(SIGINT, monitor_handler);
 
-    // The server keeps hearing for requests
+    // The server keeps listening for requests
     while (running) {
         int read_bytes = read(request_pipe, &request, sizeof(Request));
         if (read_bytes) {
-            // The requests as then handled
+            // The requests are then handled
             write(STDOUT_FILENO, "Handling Request\n", sizeof(char) * 18);
-            handle_request(request, &running_programs);
+            handle_request(request, &running_programs, pids_folder_path);
         }
     }
-    unlink(REQUEST_PIPE_PATH);
     write(STDOUT_FILENO, "Server shutting down\n", sizeof(char) * 22);
+    unlink(REQUEST_PIPE_PATH);
     free(running_programs.array);
+    free(pids_folder_path);
     return 0;
 }
