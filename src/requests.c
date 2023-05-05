@@ -51,3 +51,21 @@ Request new_status_request(pid_t requesting_pid) {
     new_request.requesting_pid = requesting_pid;
     return new_request;
 }
+
+Request new_stats_time_request(pid_t requesting_pid, char **pids,
+                               int pids_number) {
+    Request new_request;
+    new_request.type = STATS_TIME;
+    new_request.requesting_pid = requesting_pid;
+
+    // The program name field will be used to carry the relevant pids
+    strncpy(new_request.program_name, pids[0], NAME_MAX - 1);
+    for (int i = 1; i < pids_number; i++) {
+        strncat(new_request.program_name, " ",
+                NAME_MAX - strlen(new_request.program_name) - 1);
+        strncat(new_request.program_name, pids[i],
+                NAME_MAX - strlen(new_request.program_name) - 1);
+    }
+
+    return new_request;
+}

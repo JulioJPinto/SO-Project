@@ -81,6 +81,8 @@ int handle_request(Request request, Running_Programs *running_programs,
         // The output pipe is open
         char *output_pipe_string = output_pipe_by_pid(request.requesting_pid);
         int output_pipe = open(output_pipe_string, O_WRONLY);
+        free(output_pipe_string);
+
         // The running message for each program is created
         Request program;
         char message[100];
@@ -112,6 +114,46 @@ int handle_request(Request request, Running_Programs *running_programs,
         // An empty string is sent to signal all the programs were sent
         write(output_pipe, "", sizeof(char));
         close(output_pipe);
+
+    } break;
+    case STATS_TIME: {
+        // The output pipe is open
+        char *output_pipe_string = output_pipe_by_pid(request.requesting_pid);
+        int output_pipe = open(output_pipe_string, O_WRONLY);
+        free(output_pipe_string);
+
+        char *file_path_string =
+            malloc(sizeof(char) * (strlen(pids_folder_path) + MAX_PID_LENGTH));
+        int file_path, bytes_read;
+        char buffer[100], *time_position;
+        char *pids_string = request.program_name;
+        char *pid = strtok(pids_string, " ");
+        long total_time = 0;
+        while (pid != NULL) {
+
+            sprintf(file_path_string, "%s%s", pids_folder_path, pid);
+            file_path = open(file_path_string, O_RDONLY);
+            if (file_path == -1) {
+                print_error(FILE_NOT_FOUND);
+                break;
+            }
+            bytes_read = read(file_path, buffer, sizeof(char) * 100);
+            time_position = strstr(buffer, "\n");
+            time_position++;
+            long time = 0;
+            time = (strtol(time_position, NULL, 0));
+            char *temp;
+            while (bytes_read == 100) {
+                bytes_read = read(file_path, buffer, sizeof(char) * 100);
+                time += strtol(buffer, &temp, 0) * (temp - buffer);
+            }
+            total_time += time;
+            close(file_path);
+            pid = strtok(NULL, " ");
+        }
+        write(output_pipe, &total_time, sizeof(long));
+        close(output_pipe);
+        free(file_path_string);
     } break;
     default:
         break;

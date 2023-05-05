@@ -10,7 +10,9 @@ typedef enum {
     FIFO_CREATING_ERROR,
     REQUEST_NOT_FOUND,
     PROGRAM_EXEC_ERROR,
-    NO_FOLDER_GIVEN
+    NO_FOLDER_GIVEN,
+    NO_PIDS_GIVEN,
+    FILE_NOT_FOUND
 } error;
 
 int print_error(error error);

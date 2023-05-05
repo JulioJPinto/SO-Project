@@ -39,6 +39,14 @@ int print_error(error error) {
                              "Program usage: ./monitor <Process folder path>\n",
                              sizeof(char) * 48);
         return print_status;
+    case NO_PIDS_GIVEN:
+        print_status =
+            write(STDERR_FILENO, "No PIDS given\n", sizeof(char) * 15);
+        return print_status;
+    case FILE_NOT_FOUND:
+        print_status =
+            write(STDERR_FILENO, "File not found\n", sizeof(char) * 16);
+        return print_status;
     default:
         return -1;
     }

@@ -250,3 +250,35 @@ int execute_status(char *output_pipe_string) {
     close(output_pipe);
     return 0;
 }
+
+int execute_stats_time(char **pids, int pids_number, char *output_pipe_string) {
+    if (pids_number == 0) {
+        print_error(NO_PIDS_GIVEN);
+        return 0;
+    }
+    // Opens the input pipe
+    int input_pipe = open(REQUEST_PIPE_PATH, O_WRONLY);
+
+    // Creates and sends the request to the server
+    pid_t pid = getpid();
+    Request request = new_stats_time_request(pid, pids, pids_number);
+    printf("%s\n", request.program_name);
+    write(input_pipe, &request, sizeof(Request));
+
+    // The result's pipe is opened
+    int output_pipe = open(output_pipe_string, O_RDONLY);
+
+    // The program will try to read the result from the pipe
+    long result;
+    int read_bytes = 0;
+    while (!read_bytes) {
+        read_bytes = read(output_pipe, &result, sizeof(long));
+    }
+
+    // The result is printed to the user
+    char *total_time_msg = total_exec_time_msg(result);
+    write(STDOUT_FILENO, total_time_msg, sizeof(char) * strlen(total_time_msg));
+    free(total_time_msg);
+    close(output_pipe);
+    return 0;
+}

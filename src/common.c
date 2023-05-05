@@ -30,6 +30,17 @@ char *time_taken_msg(struct timeval time) {
     return time_msg;
 }
 
+char *total_exec_time_msg(long ms) {
+    char ms_string[100];
+    int digits_written = sprintf(ms_string, "%ld ", ms);
+
+    char *time_msg = malloc(sizeof(char) * (28 + digits_written));
+    strcpy(time_msg, "Total execution time is ");
+    strcat(time_msg, ms_string);
+    strcat(time_msg, "ms\n");
+    return time_msg;
+}
+
 char *output_pipe_by_pid(pid_t pid) {
     char PID_string[MAX_PID_LENGTH + 1];
     int bytes_written = sprintf(PID_string, "%d", pid);
