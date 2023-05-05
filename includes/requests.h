@@ -7,7 +7,8 @@ typedef enum {
     SINGLE_EXEC,
     PIPELINE_EXEC,
     STATUS,
-    STATS_TIME
+    STATS_TIME,
+    STATS_COMMAND
 } request_type;
 
 #include "common.h"
@@ -32,5 +33,8 @@ Request new_status_request(pid_t requesting_pid);
 
 Request new_stats_time_request(pid_t requesting_pid, char **pids,
                                int pids_number);
+
+Request new_stats_command_request(pid_t requesting_pid, char *command,
+                                  char **pids, int pids_number);
 
 #endif

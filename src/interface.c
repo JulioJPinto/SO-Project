@@ -130,7 +130,6 @@ int handle_request(Request request, Running_Programs *running_programs,
         char *pid = strtok(pids_string, " ");
         long total_time = 0;
         while (pid != NULL) {
-
             sprintf(file_path_string, "%s%s", pids_folder_path, pid);
             file_path = open(file_path_string, O_RDONLY);
             if (file_path == -1) {
@@ -154,6 +153,33 @@ int handle_request(Request request, Running_Programs *running_programs,
         write(output_pipe, &total_time, sizeof(long));
         close(output_pipe);
         free(file_path_string);
+    } break;
+    case STATS_COMMAND: {
+        // The output pipe is open
+        char *output_pipe_string = output_pipe_by_pid(request.requesting_pid);
+        int output_pipe = open(output_pipe_string, O_WRONLY);
+        free(output_pipe_string);
+
+        char *file_path_string =
+            malloc(sizeof(char) * (strlen(pids_folder_path) + MAX_PID_LENGTH));
+        char *temp, *program = strtok(request.program_name, " ");
+        char *token = strtok(NULL, " ");
+        char buffer[50];
+        int file, result = 0;
+        while (token != NULL) {
+            sprintf(file_path_string, "%s%s", pids_folder_path, token);
+            file = open(file_path_string, O_RDONLY);
+            read(file, buffer, sizeof(char) * 50);
+            temp = strstr(buffer, "\n");
+            *temp = '\0';
+            if (!strcmp(buffer, program)) {
+                result++;
+            }
+            token = strtok(NULL, " ");
+        }
+        write(output_pipe, &result, sizeof(int));
+        free(file_path_string);
+        close(output_pipe);
     } break;
     default:
         break;

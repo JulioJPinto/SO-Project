@@ -20,6 +20,9 @@ request_type identify_command_arg(char *command) {
     if (strcmp(command, "stats-time") == 0) {
         return STATS_TIME;
     }
+    if (strcmp(command, "stats-command") == 0) {
+        return STATS_COMMAND;
+    }
     return UNKNOWN;
 }
 

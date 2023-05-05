@@ -47,6 +47,12 @@ int print_error(error error) {
         print_status =
             write(STDERR_FILENO, "File not found\n", sizeof(char) * 16);
         return print_status;
+    case TOO_MANY_PIDS:
+        print_status = write(
+            STDERR_FILENO,
+            "Too many PIDs passed as argument, increase NAME_MAX constant\n",
+            sizeof(char) * 62);
+        return print_status;
     default:
         return -1;
     }

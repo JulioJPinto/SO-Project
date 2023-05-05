@@ -23,4 +23,6 @@ char *output_pipe_by_pid(pid_t pid);
 struct timeval calculate_time_taken(struct timeval init_time,
                                     struct timeval finish_time);
 
+char *total_times_ran_msg(char *program, int result);
+
 #endif

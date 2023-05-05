@@ -39,6 +39,10 @@ int main(int argc, char **argv) {
     case STATS_TIME: {
         sucess = execute_stats_time(argv + 2, argc - 2, output_pipe_string);
     } break;
+    case STATS_COMMAND: {
+        sucess = execute_stats_command(*(argv + 2), argv + 3, argc - 3,
+                                       output_pipe_string);
+    } break;
     default:
         sucess = 1;
         break;

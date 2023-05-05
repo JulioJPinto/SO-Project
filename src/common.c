@@ -51,6 +51,18 @@ char *output_pipe_by_pid(pid_t pid) {
     return output_pipe_string;
 }
 
+char *total_times_ran_msg(char *program, int result) {
+    char int_string[100];
+    int digits_written = sprintf(int_string, "%d", result);
+
+    char *msg = malloc(sizeof(char) * (22 + strlen(program) + digits_written));
+    strcpy(msg, program);
+    strcat(msg, " was executed ");
+    strcat(msg, int_string);
+    strcat(msg, " times\n");
+    return msg;
+}
+
 // Calculates the time difference between two timestamps
 struct timeval calculate_time_taken(struct timeval init_time,
                                     struct timeval finish_time) {

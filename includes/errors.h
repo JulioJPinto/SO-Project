@@ -12,7 +12,8 @@ typedef enum {
     PROGRAM_EXEC_ERROR,
     NO_FOLDER_GIVEN,
     NO_PIDS_GIVEN,
-    FILE_NOT_FOUND
+    FILE_NOT_FOUND,
+    TOO_MANY_PIDS
 } error;
 
 int print_error(error error);
