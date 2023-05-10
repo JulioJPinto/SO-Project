@@ -5,6 +5,7 @@
 #include "array.h"
 #include "requests.h"
 
-int handle_request(Request request, Running_Programs *running_programs);
+int handle_request(Request request, Running_Programs *running_programs,
+                   char *pids_folder_path);
 
 #endif

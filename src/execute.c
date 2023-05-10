@@ -95,12 +95,16 @@ int pipeline_execute(char *commands, char *output_pipe_string) {
     // The program names are added
     char program_name[NAME_MAX];
     int n;
-    for (n = 0; n < 10 && parsed_commands[n] != NULL; n++) {
+    strncpy(program_name, parsed_commands[0][0],
+            NAME_MAX - 1 - strlen(program_name));
+    for (n = 1; n < 10 && parsed_commands[n] != NULL; n++) {
+        strncat(program_name, " | ", NAME_MAX - 1 - strlen(program_name));
         strncat(program_name, parsed_commands[n][0],
                 NAME_MAX - 1 - strlen(program_name));
     }
     program_name[NAME_MAX - 1] = '\0';
 
+    // Creating pipes to transfer information from each program to the next
     int **pipes = malloc(sizeof(int *) * (n - 1));
     for (int i = 0; i < n - 1; i++) {
         pipes[i] = malloc(sizeof(int) * 2);
@@ -109,15 +113,19 @@ int pipeline_execute(char *commands, char *output_pipe_string) {
     int *read_pipe, *write_pipe;
 
     /* Creating an internal pipe to give the program provided
-       as argument (child process) permission to run*/
+       as argument (child process) permission to run */
     int internal_pipe[2];
     pipe(internal_pipe);
 
+    // A cycle is created where each command will run in order
     pid_t pid;
     for (int i = 0; i < n; i++) {
 
         pid_t child_pid = fork();
+        // Child process
         if (child_pid == 0) {
+            /* Before starting the pipeline, the program needs to wait for
+               permission from the server */
             if (i == 0) {
                 close(internal_pipe[1]);
                 int run_permission = 0, bytes_read = 0;
@@ -128,12 +136,16 @@ int pipeline_execute(char *commands, char *output_pipe_string) {
                 if (!run_permission)
                     break;
             }
+            /* In the first iteration the program isn't fed any info from
+               previous programs, so it doesn't use a read pipe*/
             if (i != 0) {
                 read_pipe = pipes[i - 1];
                 dup2(read_pipe[0], STDIN_FILENO);
                 close(read_pipe[0]);
                 close(read_pipe[1]);
             }
+            /* In the last iteration the program doesn't feed any info and
+               prints to STDOUT, so it doesn't redirect its output to a pipe*/
             if (i != n - 1) {
                 write_pipe = pipes[i];
                 dup2(write_pipe[1], STDOUT_FILENO);
@@ -142,37 +154,58 @@ int pipeline_execute(char *commands, char *output_pipe_string) {
             }
             execvp(parsed_commands[i][0], parsed_commands[i]);
         }
-        if (i == 0) {
-            close(internal_pipe[0]);
-            pid = child_pid;
+        // Parent process
+        if (child_pid) {
+            // In the first iteration a run request is sent to the server
+            if (i == 0) {
+                close(internal_pipe[0]);
+                pid = child_pid;
 
-            // Writing "Running PID" message
-            char *running_msg = pid_running_msg(child_pid);
-            write(STDOUT_FILENO, running_msg,
-                  sizeof(char) * (14 + MAX_PID_LENGTH));
-            free(running_msg);
+                // Writing "Running PID" message
+                char *running_msg = pid_running_msg(child_pid);
+                write(STDOUT_FILENO, running_msg,
+                      sizeof(char) * (14 + MAX_PID_LENGTH));
+                free(running_msg);
 
-            Request request =
-                new_pipeline_request(getpid(), child_pid, program_name);
-            write(input_pipe, &request, sizeof(Request));
+                Request request =
+                    new_pipeline_request(getpid(), child_pid, program_name);
+                write(input_pipe, &request, sizeof(Request));
 
-            int run_permission = 0, bytes_read = 0;
-            int output_pipe = open(output_pipe_string, O_RDONLY);
-            while (!bytes_read) {
-                bytes_read = read(output_pipe, &run_permission, sizeof(int));
+                /*The parent process waits for permission to run from the
+                  server, then sends it on to the child process via an unnamed
+                  pipe*/
+                int run_permission = 0, bytes_read = 0;
+                int output_pipe = open(output_pipe_string, O_RDONLY);
+                while (!bytes_read) {
+                    bytes_read =
+                        read(output_pipe, &run_permission, sizeof(int));
+                }
+                close(output_pipe);
+                write(internal_pipe[1], &run_permission, sizeof(int));
             }
-            close(output_pipe);
-            write(internal_pipe[1], &run_permission, sizeof(int));
+            /*The input pipe for the current program is closed on the parent
+            process' end to cause EOF and terminate the program*/
+            if (i != 0) {
+                close(pipes[i - 1][0]);
+                close(pipes[i - 1][1]);
+            }
         }
     }
-    int status;
+
+    // The exit statuses of all programs are then gathered
+    int *status = malloc(sizeof(int) * n);
     for (int i = 0; i < n; i++) {
-        wait(&status);
+        wait(&(status[i]));
     }
-    for (int i = 0; i < n - 1; i++) {
-        close(pipes[i][0]);
-        close(pipes[i][1]);
+
+    // The exit statuses are then checked for any error
+    for (int i = 0; i < n; i++) {
+        if (!WIFEXITED(status[i])) {
+            print_error(PROGRAM_EXEC_ERROR);
+        }
     }
+    free(status);
+
     // The server is informed the program has stopped
     Request request = finished_execution_request(getpid(), pid);
     write(input_pipe, &request, sizeof(Request));
@@ -191,6 +224,7 @@ int pipeline_execute(char *commands, char *output_pipe_string) {
     return 0;
 }
 
+// Requests the server the current programs and prints them to the user
 int execute_status(char *output_pipe_string) {
     // Opens the input pipe
     int input_pipe = open(REQUEST_PIPE_PATH, O_WRONLY);
@@ -213,6 +247,78 @@ int execute_status(char *output_pipe_string) {
         bytes_read = read(output_pipe, message, sizeof(char) * 100);
     }
     close(input_pipe);
+    close(output_pipe);
+    return 0;
+}
+
+int execute_stats_time(char **pids, int pids_number, char *output_pipe_string) {
+    if (pids_number == 0) {
+        print_error(NO_PIDS_GIVEN);
+        return 0;
+    }
+
+    // Creates and sends the request to the server
+    pid_t pid = getpid();
+    Request request = new_stats_time_request(pid, pids, pids_number);
+    if (strlen(request.program_name) == NAME_MAX) {
+        print_error(TOO_MANY_PIDS);
+        return 0;
+    }
+    // Opens the input pipe
+    int input_pipe = open(REQUEST_PIPE_PATH, O_WRONLY);
+    write(input_pipe, &request, sizeof(Request));
+
+    // The result's pipe is opened
+    int output_pipe = open(output_pipe_string, O_RDONLY);
+
+    // The program will try to read the result from the pipe
+    long result;
+    int read_bytes = 0;
+    while (!read_bytes) {
+        read_bytes = read(output_pipe, &result, sizeof(long));
+    }
+
+    // The result is printed to the user
+    char *total_time_msg = total_exec_time_msg(result);
+    write(STDOUT_FILENO, total_time_msg, sizeof(char) * strlen(total_time_msg));
+    free(total_time_msg);
+    close(output_pipe);
+    return 0;
+}
+
+int execute_stats_command(char *command, char **pids, int pids_number,
+                          char *output_pipe_string) {
+    if (pids_number == 0) {
+        print_error(NO_PIDS_GIVEN);
+        return 0;
+    }
+
+    // Creates and sends the request to the server
+    pid_t pid = getpid();
+    Request request =
+        new_stats_command_request(pid, command, pids, pids_number);
+    if (strlen(request.program_name) == NAME_MAX) {
+        print_error(TOO_MANY_PIDS);
+        return 0;
+    }
+    // Opens the input pipe
+    int input_pipe = open(REQUEST_PIPE_PATH, O_WRONLY);
+    write(input_pipe, &request, sizeof(Request));
+
+    // The result's pipe is opened
+    int output_pipe = open(output_pipe_string, O_RDONLY);
+
+    // The program will try to read the result from the pipe
+    int result;
+    int read_bytes = 0;
+    while (!read_bytes) {
+        read_bytes = read(output_pipe, &result, sizeof(int));
+    }
+
+    // The result is printed to the user
+    char *total_time_msg = total_times_ran_msg(command, result);
+    write(STDOUT_FILENO, total_time_msg, sizeof(char) * strlen(total_time_msg));
+    free(total_time_msg);
     close(output_pipe);
     return 0;
 }
