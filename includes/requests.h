@@ -8,7 +8,8 @@ typedef enum {
     PIPELINE_EXEC,
     STATUS,
     STATS_TIME,
-    STATS_COMMAND
+    STATS_COMMAND,
+    STATS_UNIQ
 } request_type;
 
 #include "common.h"
@@ -36,5 +37,8 @@ Request new_stats_time_request(pid_t requesting_pid, char **pids,
 
 Request new_stats_command_request(pid_t requesting_pid, char *command,
                                   char **pids, int pids_number);
+
+Request new_stats_uniq_request(pid_t requesting_pid, char **pids,
+                                int pids_number);
 
 #endif

@@ -322,3 +322,39 @@ int execute_stats_command(char *command, char **pids, int pids_number,
     close(output_pipe);
     return 0;
 }
+
+int execute_stats_uniq(char **pids, int pids_number, char* output_pipe_string) {
+    if (pids_number == 0) {
+        print_error(NO_PIDS_GIVEN);
+        return 0;
+    }
+    
+    pid_t pid = getpid();
+    Request request = new_stats_uniq_request(pid, pids, pids_number);
+    if (strlen(request.program_name) == NAME_MAX) {
+        print_error(TOO_MANY_PIDS);
+        return 0;
+    }
+
+    // Opens the input pipe
+    int input_pipe = open(REQUEST_PIPE_PATH, O_WRONLY);
+    write(input_pipe, &request, sizeof(Request));
+
+    // The result's pipe is opened
+    int output_pipe = open(output_pipe_string, O_RDONLY);
+
+    // The program will try to read the result from the pipe
+    int result;
+    int read_bytes = 0;
+    while (!read_bytes) {
+        read_bytes = read(output_pipe, &result, sizeof(int));
+    }
+
+    // The result is printed to the user
+    char *total_time_msg = total_times_ran_msg(command, result);
+    write(STDOUT_FILENO, total_time_msg, sizeof(char) * strlen(total_time_msg));
+    free(total_time_msg);
+    close(output_pipe);
+    return 0;
+
+}

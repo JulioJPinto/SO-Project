@@ -20,7 +20,7 @@ OBJ_CLIENT := $(SRC_CLIENT:src/%.c=obj/tracer/%.o)
 BUILD_DIR := $(shell mkdir -p bin obj/monitor obj/tracer)
 
 .PHONY: all
-all: $(EXEC_SERVER) $(EXEC_CLIENT)
+all: $(EXEC_SERVER) $(EXEC_CLIENT); mkdir PIDS
 
 $(EXEC_SERVER): $(OBJ_SERVER)
 	@$(CC) $(FLAGS) $^ -o $@ ; echo "[Compiling] $@"
@@ -40,6 +40,7 @@ clean:
 	@find . -type p -delete ; echo "[Cleaning] Making sure the pipes are closed"
 	@rm -rf bin/ ; echo "[Cleaning] bin/"
 	@rm -rf obj/ ; echo "[Cleaning] obj/"
+	@rm -rf PIDS/ ; echo "[Cleaning] PIDS/"
 
 cleanpipe:
 	@find . -type p -delete ; echo "[Cleaning] Making sure the pipes are closed"
