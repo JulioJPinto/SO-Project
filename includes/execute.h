@@ -12,4 +12,6 @@ int execute_stats_time(char **pids, int pids_number, char *output_pipe_string);
 int execute_stats_command(char *command, char **pids, int pids_number,
                           char *output_pipe_string);
 
+int execute_stats_uniq( char **pids, int pids_number,char *output_pipe_string);
+
 #endif

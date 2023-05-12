@@ -181,23 +181,27 @@ int handle_request(Request request, Running_Programs *running_programs,
         free(file_path_string);
         close(output_pipe);
     } break;
-    case STATS_UNIQ {
+    case STATS_UNIQ: {
         char *output_pipe_string = output_pipe_by_pid(request.requesting_pid);
         int output_pipe = open(output_pipe_string, O_WRONLY);
         free(output_pipe_string);
 
+
         char *file_path_string =
             malloc(sizeof(char) * (strlen(pids_folder_path) + MAX_PID_LENGTH));
-        char *temp, *program = strtok(request.program_name, " ");
+        char *temp,  *pid_program, *program = strtok(request.program_name, " ");
         char *token = strtok(NULL, " ");
         char buffer[50];
         int file, result = 0;
+
+        char **uniqs_array;
+
         while (token != NULL) {
             sprintf(file_path_string, "%s%s", pids_folder_path, token);
             file = open(file_path_string, O_RDONLY);
             read(file, buffer, sizeof(char) * 50);
-            temp = strstr(buffer, "\n");
-            *temp = '\0';
+            strtok 
+
             if (!strcmp(buffer, program)) {
                 result++;
             }

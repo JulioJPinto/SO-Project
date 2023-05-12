@@ -43,6 +43,9 @@ int main(int argc, char **argv) {
         sucess = execute_stats_command(*(argv + 2), argv + 3, argc - 3,
                                        output_pipe_string);
     } break;
+    case STATS_UNIQ: {
+        sucess = execute_stats_uniq(argv + 2, argc - 2, output_pipe_string);
+    }
     default:
         sucess = 1;
         break;
