@@ -181,6 +181,77 @@ int handle_request(Request request, Running_Programs *running_programs,
         free(file_path_string);
         close(output_pipe);
     } break;
+    case STATS_UNIQ: {
+        char *output_pipe_string = output_pipe_by_pid(request.requesting_pid);
+        int output_pipe = open(output_pipe_string, O_WRONLY);
+        free(output_pipe_string);
+
+        char *file_path_string =
+            malloc(sizeof(char) * (strlen(pids_folder_path) + MAX_PID_LENGTH));
+
+        char *token = strtok(request.program_name, " ");
+        char buffer[50];
+
+        char *uniqs_array[64];
+        for (int i = 0; i < 64; i++) {
+            uniqs_array[i] = NULL;
+        }
+
+        int current_uniqs_array_index = 0;
+
+        while (token != NULL) {
+            sprintf(file_path_string, "%s%s", pids_folder_path, token);
+            int file = open(file_path_string, O_RDONLY);
+            read(file, buffer, sizeof(char) * 50);
+
+            close(file);
+
+            char pid_prog_name[50];
+            for (int i = 0; i < 50; i++) {
+                pid_prog_name[i] = buffer[i];
+                if (pid_prog_name[i] == '\n') {
+                    pid_prog_name[i] = '\0';
+                    break;
+                }
+            }
+
+            int is_in_array = 0;
+
+            for (int i = 0; i < current_uniqs_array_index; i++) {
+                if(strcmp(uniqs_array[i], pid_prog_name) == 0) { // already in array
+                    is_in_array = 1;
+                    break;
+                }
+            }
+
+            if (!is_in_array) {
+                uniqs_array[current_uniqs_array_index] = malloc(sizeof(char) * 50);
+                strcpy(uniqs_array[current_uniqs_array_index], pid_prog_name);
+
+                current_uniqs_array_index++;
+            }
+
+            token = strtok(NULL, " ");
+        }
+
+        char* result = malloc(sizeof(char) * 1000);
+        for (int i = 0; i < current_uniqs_array_index; i++) {
+            strcat(result, uniqs_array[i]);
+            strcat(result, "\n");
+        }
+
+        for (int i = 0; i < 64; ++i) {
+            if (uniqs_array[i] != NULL) {
+                free(uniqs_array[i]);
+            }
+        }
+
+        write(output_pipe, result, sizeof(char) * strlen(result));
+
+        free(result);
+        free(file_path_string);
+        close(output_pipe);
+    } break;
     default:
         break;
     }

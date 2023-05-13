@@ -8,7 +8,7 @@ typedef struct {
 } Running_Programs;
 
 // Creates new array for running programs to be stored
-Running_Programs new_list();
+Running_Programs new_list(void);
 
 // Adds a program to the list of currently running programs
 void add_running_program(Running_Programs *list, Request new_program);
