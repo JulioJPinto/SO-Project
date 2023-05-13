@@ -345,16 +345,14 @@ int execute_stats_uniq( char **pids, int pids_number, char *output_pipe_string) 
     int output_pipe = open(output_pipe_string, O_RDONLY);
 
     // The program will try to read the result from the pipe
-    int result;
+    char buffer[64];
     int read_bytes = 0;
     while (!read_bytes) {
-        read_bytes = read(output_pipe, &result, sizeof(int));
+        read_bytes = read(output_pipe, buffer, sizeof(char) * 64);
     }
 
     // The result is printed to the used
-    char *final_message;
-    write(STDOUT_FILENO, final_message, sizeof(char) * strlen(final_message));
-    free(total_time_msg);
+    write(STDOUT_FILENO, buffer, sizeof(char) * strlen(buffer));
     close(output_pipe);
     return 0;
 

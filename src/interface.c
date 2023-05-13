@@ -189,25 +189,52 @@ int handle_request(Request request, Running_Programs *running_programs,
 
         char *file_path_string =
             malloc(sizeof(char) * (strlen(pids_folder_path) + MAX_PID_LENGTH));
-        char *temp,  *pid_program, *program = strtok(request.program_name, " ");
+        char *temp, *program = strtok(request.program_name, " ");
         char *token = strtok(NULL, " ");
         char buffer[50];
-        int file, result = 0;
+        int file;
 
-        char **uniqs_array;
+        char *uniqs_array[64];
+        for(int i = 0; i < 64; i++) {
+            uniqs_array[i] = NULL;
+        }
 
         while (token != NULL) {
             sprintf(file_path_string, "%s%s", pids_folder_path, token);
             file = open(file_path_string, O_RDONLY);
             read(file, buffer, sizeof(char) * 50);
-            strtok 
 
-            if (!strcmp(buffer, program)) {
-                result++;
+            char pid_prog_name[50];
+            for(int i = 0; i < 50 ; i++) {
+                pid_prog_name[i] = buffer[i];
+                if(pid_prog_name[i] == '\n') {
+                    pid_prog_name[i++] == '\0';
+                    break;
+                }
             }
+            
+            int controller = 0;
+            int counter = 0;
+            for( ; counter < 64 && uniqs_array[counter] != NULL; counter++) {
+                if(!strcmp(uniqs_array[counter], pid_prog_name)) {
+                    controller = 1;
+                    break;
+                }
+            }
+            if(!controller) {
+                strcmp(uniqs_array[counter + 1], pid_prog_name);
+            }
+
             token = strtok(NULL, " ");
         }
-        write(output_pipe, &result, sizeof(int));
+
+        char* result = "";
+        for(int i = 0; i < 64 && uniqs_array[i] != NULL; i++) {
+            strcat(result,uniqs_array[i]);
+            strcat(result,"\n");
+        }
+
+        write(output_pipe, result, sizeof(char) * strlen(result));
         free(file_path_string);
         close(output_pipe);
     } break;

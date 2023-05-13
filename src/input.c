@@ -23,6 +23,9 @@ request_type identify_command_arg(char *command) {
     if (strcmp(command, "stats-command") == 0) {
         return STATS_COMMAND;
     }
+    if (!strcmp(command, "stats-uniq")) {
+        return STATS_UNIQ;
+    }
     return UNKNOWN;
 }
 
