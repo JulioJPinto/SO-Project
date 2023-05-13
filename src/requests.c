@@ -91,7 +91,9 @@ Request new_stats_command_request(pid_t requesting_pid, char *command,
 Request new_stats_uniq_request(pid_t requesting_pid, char **pids,
                                 int pids_number) {
     
-    Request new_request = { STATS_UNIQ, requesting_pid};
+    Request new_request;
+    new_request.type = STATS_UNIQ;
+    new_request.requesting_pid = requesting_pid;
 
     strncpy(new_request.program_name, pids[0], NAME_MAX - 1);
     for (int i = 1; i < pids_number; i++) {

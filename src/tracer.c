@@ -10,7 +10,7 @@
 #include "requests.h"
 
 int main(int argc, char **argv) {
-    int sucess;
+    int success;
     error input_check = verify_input(argc, argv);
     if (input_check != NONE) {
         print_error(input_check);
@@ -28,30 +28,31 @@ int main(int argc, char **argv) {
 
     switch (request_type) {
     case SINGLE_EXEC:
-        sucess = single_execute(argv[3], output_pipe_string);
+        success = single_execute(argv[3], output_pipe_string);
         break;
     case PIPELINE_EXEC:
-        sucess = pipeline_execute(argv[3], output_pipe_string);
+        success = pipeline_execute(argv[3], output_pipe_string);
         break;
     case STATUS: {
-        sucess = execute_status(output_pipe_string);
+        success = execute_status(output_pipe_string);
     } break;
     case STATS_TIME: {
-        sucess = execute_stats_time(argv + 2, argc - 2, output_pipe_string);
+        success = execute_stats_time(argv + 2, argc - 2, output_pipe_string);
     } break;
     case STATS_COMMAND: {
-        sucess = execute_stats_command(*(argv + 2), argv + 3, argc - 3,
-                                       output_pipe_string);
+        success = execute_stats_command(*(argv + 2), argv + 3, argc - 3,
+                                        output_pipe_string);
     } break;
     case STATS_UNIQ: {
-        sucess = execute_stats_uniq(argv + 2, argc - 2, output_pipe_string);
+        success = execute_stats_uniq(argv + 2, argc - 2, output_pipe_string);
+        break;
     }
     default:
-        sucess = 1;
+        success = 1;
         break;
     }
 
     unlink(output_pipe_string);
     free(output_pipe_string);
-    return sucess;
+    return success;
 }

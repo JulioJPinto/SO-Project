@@ -20,7 +20,7 @@ OBJ_CLIENT := $(SRC_CLIENT:src/%.c=obj/tracer/%.o)
 BUILD_DIR := $(shell mkdir -p bin obj/monitor obj/tracer)
 
 .PHONY: all
-all: $(EXEC_SERVER) $(EXEC_CLIENT); mkdir PIDS
+all: $(EXEC_SERVER) $(EXEC_CLIENT); mkdir -p PIDS
 
 $(EXEC_SERVER): $(OBJ_SERVER)
 	@$(CC) $(FLAGS) $^ -o $@ ; echo "[Compiling] $@"

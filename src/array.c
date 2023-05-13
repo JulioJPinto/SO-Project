@@ -5,7 +5,7 @@
 #include "requests.h"
 
 // Creates new array for running programs to be stored
-Running_Programs new_list() {
+Running_Programs new_list(void) {
     Request *array = malloc(sizeof(Request) * 25);
     Running_Programs new_list;
     new_list.array = array;

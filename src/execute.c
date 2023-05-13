@@ -323,7 +323,7 @@ int execute_stats_command(char *command, char **pids, int pids_number,
     return 0;
 }
 
-int execute_stats_uniq( char **pids, int pids_number, char *output_pipe_string) {
+int execute_stats_uniq (char **pids, int pids_number, char *output_pipe_string) {
     if (pids_number == 0) {
         print_error(NO_PIDS_GIVEN);
         return 0;
@@ -341,19 +341,20 @@ int execute_stats_uniq( char **pids, int pids_number, char *output_pipe_string) 
     int input_pipe = open(REQUEST_PIPE_PATH, O_WRONLY);
     write(input_pipe, &request, sizeof(Request));
 
+    close(input_pipe);
+
     // The result's pipe is opened
     int output_pipe = open(output_pipe_string, O_RDONLY);
 
     // The program will try to read the result from the pipe
-    char buffer[64];
+    char buffer[1000];
     int read_bytes = 0;
     while (!read_bytes) {
-        read_bytes = read(output_pipe, buffer, sizeof(char) * 64);
+        read_bytes = read(output_pipe, buffer, sizeof(char) * 1000);
     }
 
     // The result is printed to the used
     write(STDOUT_FILENO, buffer, sizeof(char) * strlen(buffer));
     close(output_pipe);
     return 0;
-
 }
